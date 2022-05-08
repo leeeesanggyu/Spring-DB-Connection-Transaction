@@ -9,15 +9,15 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 public class MemberServiceV1 {
 
-    private final MemberRepositoryV1 memberRepositoryV1;
+    private final MemberRepositoryV1 memberRepository;
 
     public void accountTransfer(String fromId, String toId, int money) throws SQLException {
-        final Member fromMember = memberRepositoryV1.findById(fromId);
-        final Member toMember = memberRepositoryV1.findById(toId);
+        final Member fromMember = memberRepository.findById(fromId);
+        final Member toMember = memberRepository.findById(toId);
 
-        memberRepositoryV1.update(fromMember.getMemberId(), fromMember.getMoney() - money);
+        memberRepository.update(fromMember.getMemberId(), fromMember.getMoney() - money);
         validation(toMember);
-        memberRepositoryV1.update(toMember.getMemberId(), toMember.getMoney() + money);
+        memberRepository.update(toMember.getMemberId(), toMember.getMoney() + money);
     }
 
     private void validation(Member toMember) {
