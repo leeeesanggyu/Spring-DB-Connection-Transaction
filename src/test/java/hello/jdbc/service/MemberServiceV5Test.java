@@ -1,8 +1,8 @@
 package hello.jdbc.service;
 
-import hello.jdbc.aop.MyTransactionalAspect;
 import hello.jdbc.domain.Member;
-import hello.jdbc.repository.MemberRepositoryV3;
+import hello.jdbc.repository.MemberRepository;
+import hello.jdbc.repository.MemberRepositoryV5_1;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -22,23 +21,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * 트랜잭션 - @MyTransactional 구현
+ * 예외 누수 문제 해결
+ * CheckedException -> RuntimeException
+ * MemberRepository Interface 의존
  */
 @Slf4j
-@Import(MyTransactionalAspect.class)
 @SpringBootTest
-class MemberServiceV4Test {
+class MemberServiceV5Test {
 
     @Autowired
-    MemberServiceV4 memberService;
+    MemberServiceV5 memberService;
 
     @Autowired
-    MemberRepositoryV3 memberRepository;
+    MemberRepository memberRepository;
 
     private static final String toMemberId = "이상규";
     private static final String fromMemberId = "박승진";
     private static final String errorMemberId = "ex";
-    private static final int money = 10000;
+    private static final int money = 5000;
 
     @TestConfiguration
     static class TestConfig {
@@ -50,13 +50,18 @@ class MemberServiceV4Test {
         }
 
         @Bean
-        MemberRepositoryV3 memberRepositoryV3() {
-            return new MemberRepositoryV3(dataSource);
+        MemberRepository memberRepository() {
+            return new MemberRepositoryV5_1(dataSource);
+        }
+
+        @Bean
+        MemberServiceV5 memberService() {
+            return new MemberServiceV5(memberRepository());
         }
     }
 
     @AfterEach
-    void after() throws SQLException {
+    void after() {
         memberRepository.delete(toMemberId);
         memberRepository.delete(fromMemberId);
         memberRepository.delete(errorMemberId);
@@ -72,7 +77,7 @@ class MemberServiceV4Test {
 
     @Test
     @DisplayName("정상 이체")
-    void accountTransfer() throws SQLException {
+    void accountTransfer() {
         final Member toMember = new Member(toMemberId, money);
         final Member fromMember = new Member(fromMemberId, money);
         memberRepository.save(toMember);
@@ -88,7 +93,7 @@ class MemberServiceV4Test {
 
     @Test
     @DisplayName("이체 중 예외발생")
-    void accountTransferEx() throws SQLException {
+    void accountTransferEx() {
         final Member toMember = new Member(toMemberId, money);
         final Member fromMember = new Member(errorMemberId, money);
         memberRepository.save(toMember);

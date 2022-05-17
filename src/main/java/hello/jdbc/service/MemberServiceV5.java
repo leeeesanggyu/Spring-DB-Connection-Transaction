@@ -1,34 +1,34 @@
 package hello.jdbc.service;
 
-import hello.jdbc.aop.MyTransactional;
 import hello.jdbc.domain.Member;
+import hello.jdbc.repository.MemberRepository;
 import hello.jdbc.repository.MemberRepositoryV3;
-import hello.jdbc.repository.MemberRepositoryV4;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
 
 /**
- * 트랜잭션 - @MyTransactional 구현
+ * 예외 누수 문제 해결
+ * SQLException 제거
+ *
+ * MemberRepository Interface 의존
  */
 @Slf4j
-@Component
-public class MemberServiceV4 {
+public class MemberServiceV5 {
 
-    private final MemberRepositoryV4 memberRepository;
+    private final MemberRepository memberRepository;
 
-    public MemberServiceV4(MemberRepositoryV4 memberRepository) {
+    public MemberServiceV5(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
-    @MyTransactional
-    public void accountTransfer(String fromId, String toId, int money) throws SQLException {
+    @Transactional
+    public void accountTransfer(String fromId, String toId, int money) {
         accountTransferLogic(fromId, toId, money);
     }
 
-    private void accountTransferLogic(String fromId, String toId, int money) throws SQLException {
+    private void accountTransferLogic(String fromId, String toId, int money) {
         final Member fromMember = memberRepository.findById(fromId);
         final Member toMember = memberRepository.findById(toId);
 

@@ -1,29 +1,33 @@
 package hello.jdbc.repository;
 
 import hello.jdbc.domain.Member;
+import hello.jdbc.repository.exception.MyDBException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.NoSuchElementException;
 
 /**
- * 트랜잭션 - @MyTransactional 구현
+ * 예외 누수 문제 해결
+ * CheckedException -> RuntimeException
+ * MemberRepository Interface 사용
+ * throws SQLException 제거
  */
 @Slf4j
-@Component
-public class MemberRepositoryV4 {
+public class MemberRepositoryV5_1 implements MemberRepository{
 
     private final DataSource dataSource;
 
-    public MemberRepositoryV4(DataSource dataSource) {
+    public MemberRepositoryV5_1(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    public Member save(Member member) throws SQLException {
+    @Override
+    public Member save(Member member) {
         String sql = "insert into member(member_id, money) values (?, ?)";
 
         Connection con = null;
@@ -38,15 +42,15 @@ public class MemberRepositoryV4 {
 
             return member;
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDBException(e);
         } finally {
             close(con, pstmt, null);
         }
 
     }
 
-    public int update(String memberId, int money) throws SQLException {
+    @Override
+    public int update(String memberId, int money) {
         String sql = "update member set money = ? where member_id = ?";
 
         Connection con = null;
@@ -61,14 +65,14 @@ public class MemberRepositoryV4 {
             log.info("update result size = {}", resultSize);
             return resultSize;
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDBException(e);
         } finally {
             close(con, pstmt, null);
         }
     }
 
-    public int delete(String memberId) throws SQLException {
+    @Override
+    public int delete(String memberId) {
         String sql = "delete from member where member_id = ?";
 
         Connection con = null;
@@ -82,14 +86,14 @@ public class MemberRepositoryV4 {
             log.info("delete result size = {}", resultSize);
             return resultSize;
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDBException(e);
         } finally {
             close(con, pstmt, null);
         }
     }
 
-    public Member findById(String memberId) throws SQLException {
+    @Override
+    public Member findById(String memberId) {
         String sql = "select * from member where member_id = ?";
 
         Connection con = null;
@@ -111,8 +115,7 @@ public class MemberRepositoryV4 {
                 throw new NoSuchElementException("member not found memberId = " + memberId);
             }
         } catch (SQLException e) {
-            log.error("db error", e);
-            throw e;
+            throw new MyDBException(e);
         } finally {
             close(con, pstmt, null);
         }
