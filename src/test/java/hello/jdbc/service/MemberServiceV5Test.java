@@ -4,6 +4,7 @@ import hello.jdbc.domain.Member;
 import hello.jdbc.repository.MemberRepository;
 import hello.jdbc.repository.MemberRepositoryV5_1;
 import hello.jdbc.repository.MemberRepositoryV5_2;
+import hello.jdbc.repository.MemberRepositoryV6;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -52,7 +54,7 @@ class MemberServiceV5Test {
 
         @Bean
         MemberRepository memberRepository() {
-            return new MemberRepositoryV5_2(dataSource);
+            return new MemberRepositoryV6(dataSource);
         }
 
         @Bean
