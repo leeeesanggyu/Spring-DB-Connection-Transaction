@@ -3,6 +3,7 @@ package hello.jdbc.service;
 import hello.jdbc.domain.Member;
 import hello.jdbc.repository.MemberRepository;
 import hello.jdbc.repository.MemberRepositoryV5_1;
+import hello.jdbc.repository.MemberRepositoryV5_2;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -51,7 +52,7 @@ class MemberServiceV5Test {
 
         @Bean
         MemberRepository memberRepository() {
-            return new MemberRepositoryV5_1(dataSource);
+            return new MemberRepositoryV5_2(dataSource);
         }
 
         @Bean
